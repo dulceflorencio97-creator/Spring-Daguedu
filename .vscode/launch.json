@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-DagueduApplication<daguedu>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.dmfl.daguedu.DagueduApplication",
+            "projectName": "daguedu",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

@@ -1,0 +1,15 @@
+{
+  "folders": [
+    {
+      "name": "Docker",
+      "path": "."
+    },
+    {
+      "name": "Backend Maven",
+      "path": "daguedu1"
+    }
+  ],
+  "settings": {
+    "java.configuration.updateBuildConfiguration": "automatic"
+  }
+}

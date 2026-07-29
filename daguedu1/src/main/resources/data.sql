@@ -3,11 +3,11 @@ INSERT IGNORE INTO categorias (id, nombre) VALUES
   (1, 'Electronica'), (2, 'Computo'), (3, 'Hogar'), (4, 'Accesorios'),
   (5, 'Moda'), (6, 'Deportes'), (7, 'Belleza'), (8, 'Supermercado');
 
-INSERT IGNORE INTO proveedores (id, nombre, email, empresa, telefono) VALUES
-  (1, 'Andrea Lopez', 'contacto@tecnologiamx.com', 'Tecnologia MX', '5512345678'),
-  (2, 'Carlos Ruiz', 'ventas@hogarymas.com', 'Hogar y Mas', '5587654321'),
-  (3, 'Sofia Hernandez', 'sofia@modaurbana.com', 'Moda Urbana', '5545678912'),
-  (4, 'Miguel Torres', 'ventas@deportesactivos.com', 'Deportes Activos', '5598761234');
+INSERT IGNORE INTO proveedores (id, nombre, contacto, email, telefono) VALUES
+  (1, 'Andrea Lopez', 'Tecnologia MX', 'contacto@tecnologiamx.com', '5512345678'),
+  (2, 'Carlos Ruiz', 'Hogar y Mas', 'ventas@hogarymas.com', '5587654321'),
+  (3, 'Sofia Hernandez', 'Moda Urbana', 'sofia@modaurbana.com', '5545678912'),
+  (4, 'Miguel Torres', 'Deportes Activos', 'ventas@deportesactivos.com', '5598761234');
 
 INSERT IGNORE INTO productos (id, descripcion, imagen_url, nombre, precio, stock, categoria_id, proveedor_id) VALUES
   (1, 'Laptop para estudio y trabajo con pantalla de 15.6 pulgadas.', 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&q=80&w=800', 'Laptop Lenovo IdeaPad', 13000, 6, 2, 1),

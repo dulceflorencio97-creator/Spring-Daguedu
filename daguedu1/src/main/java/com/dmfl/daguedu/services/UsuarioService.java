@@ -1,6 +1,7 @@
 package com.dmfl.daguedu.services;
 
 import com.dmfl.daguedu.dto.RegistroRequest;
+import com.dmfl.daguedu.dto.PerfilRequest;
 import com.dmfl.daguedu.modelo.ClienteEntity;
 import com.dmfl.daguedu.modelo.Rol;
 import com.dmfl.daguedu.modelo.UsuarioEntity;
@@ -11,6 +12,7 @@ import com.dmfl.daguedu.repository.ClienteRepository;
 import com.dmfl.daguedu.repository.UsuarioRepository;
 
 import jakarta.transaction.Transactional;
+import java.util.List;
 
 @Service
 public class UsuarioService {
@@ -38,6 +40,8 @@ public class UsuarioService {
             usuario.setEmail(request.getEmail());
             usuario.setPassword(passwordEncoder.encode(request.getPassword()));
             usuario.setNombre(request.getNombre());
+            usuario.setDireccion(request.getDireccion());
+            usuario.setTelefono(request.getTelefono());
 
             Rol rol = Rol.ROLE_CLIENTE;
             if (request.getRol() != null && request.getRol().equalsIgnoreCase("ROLE_ADMIN")) {
@@ -54,6 +58,68 @@ public class UsuarioService {
                 clienteRepository.save(cliente);
             }
             return saveUsuario;
+        }
+
+        @Transactional
+        public UsuarioEntity actualizarPerfil(PerfilRequest request) {
+            UsuarioEntity usuario = usuarioRepository.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+            usuario.setNombre(request.getNombre());
+            usuario.setDireccion(request.getDireccion());
+            usuario.setTelefono(request.getTelefono());
+            UsuarioEntity actualizado = usuarioRepository.save(usuario);
+
+            if (actualizado.getRole() == Rol.ROLE_CLIENTE) {
+                ClienteEntity cliente = clienteRepository.findByEmail(actualizado.getEmail())
+                        .orElseGet(ClienteEntity::new);
+                cliente.setNombre(actualizado.getNombre());
+                cliente.setEmail(actualizado.getEmail());
+                cliente.setDireccion(actualizado.getDireccion());
+                cliente.setTelefono(actualizado.getTelefono());
+                clienteRepository.save(cliente);
+            }
+            return actualizado;
+        }
+
+        @Transactional
+        public List<UsuarioEntity> obtenerUsuarios() {
+            return usuarioRepository.findAll();
+        }
+
+        @Transactional
+        public UsuarioEntity actualizarUsuario(Long id, RegistroRequest request) {
+            UsuarioEntity usuario = usuarioRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+            usuario.setNombre(request.getNombre());
+            usuario.setDireccion(request.getDireccion());
+            usuario.setTelefono(request.getTelefono());
+            if (request.getPassword() != null && !request.getPassword().isBlank()) {
+                usuario.setPassword(passwordEncoder.encode(request.getPassword()));
+            }
+            Rol rol = "ROLE_ADMIN".equalsIgnoreCase(request.getRol()) ? Rol.ROLE_ADMIN : Rol.ROLE_CLIENTE;
+            usuario.setRole(rol);
+            UsuarioEntity actualizado = usuarioRepository.save(usuario);
+
+            ClienteEntity cliente = clienteRepository.findByEmail(actualizado.getEmail()).orElseGet(ClienteEntity::new);
+            if (rol == Rol.ROLE_CLIENTE) {
+                cliente.setNombre(actualizado.getNombre());
+                cliente.setEmail(actualizado.getEmail());
+                cliente.setDireccion(actualizado.getDireccion());
+                cliente.setTelefono(actualizado.getTelefono());
+                clienteRepository.save(cliente);
+            } else {
+                clienteRepository.findByEmail(actualizado.getEmail()).ifPresent(clienteRepository::delete);
+            }
+            return actualizado;
+        }
+
+        @Transactional
+        public void eliminarUsuario(Long id) {
+            UsuarioEntity usuario = usuarioRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+            clienteRepository.findByEmail(usuario.getEmail()).ifPresent(clienteRepository::delete);
+            usuarioRepository.delete(usuario);
         }
 
 }

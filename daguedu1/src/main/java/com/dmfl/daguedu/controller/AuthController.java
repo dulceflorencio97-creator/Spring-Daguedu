@@ -10,13 +10,22 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import com.dmfl.daguedu.dto.AuthRequest;
 import com.dmfl.daguedu.dto.AuthResponse;
 import com.dmfl.daguedu.dto.RegistroRequest;
+import com.dmfl.daguedu.dto.PerfilRequest;
+import com.dmfl.daguedu.modelo.ClienteEntity;
 import com.dmfl.daguedu.modelo.UsuarioEntity;
+import com.dmfl.daguedu.repository.ClienteRepository;
+import com.dmfl.daguedu.repository.UsuarioRepository;
 import com.dmfl.daguedu.segurity.JwtTokenProvider;
 import com.dmfl.daguedu.services.UsuarioService;
+import java.util.List;
 
 
 @RestController
@@ -26,13 +35,17 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtokenPrivider;
     private final UsuarioService usuarioService;
+    private final UsuarioRepository usuarioRepository;
+    private final ClienteRepository clienteRepository;
 
 
     public AuthController(AuthenticationManager authenticationManager, JwtTokenProvider jwtokenPrivider,
-            UsuarioService usuarioService) {
+            UsuarioService usuarioService, UsuarioRepository usuarioRepository, ClienteRepository clienteRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtokenPrivider = jwtokenPrivider;
         this.usuarioService = usuarioService;
+        this.usuarioRepository = usuarioRepository;
+        this.clienteRepository = clienteRepository;
     }
 
     @PostMapping("/login")
@@ -49,8 +62,13 @@ public class AuthController {
             .findFirst()
             .orElse("ROLE_CLIENTE");
 
-        return ResponseEntity.ok(new AuthResponse(token,
-            userPrincipal.getUsername(), userPrincipal.getUsername(), authority));
+        UsuarioEntity usuario = usuarioRepository.findByEmail(userPrincipal.getUsername())
+            .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        ClienteEntity cliente = clienteRepository.findByEmail(usuario.getEmail()).orElse(null);
+
+        return ResponseEntity.ok(new AuthResponse(token, usuario.getUsername(), usuario.getNombre(), authority,
+            usuario.getEmail(), usuario.getDireccion() != null ? usuario.getDireccion() : (cliente != null ? cliente.getDireccion() : null),
+            usuario.getTelefono() != null ? usuario.getTelefono() : (cliente != null ? cliente.getTelefono() : null)));
     }
 
     @PostMapping("/registro")
@@ -58,6 +76,39 @@ public class AuthController {
         try {
             UsuarioEntity usuario = usuarioService.saveUsuario(request);
             return ResponseEntity.ok(usuario);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/usuarios")
+    public ResponseEntity<List<UsuarioEntity>> usuarios() {
+        return ResponseEntity.ok(usuarioService.obtenerUsuarios());
+    }
+
+    @PutMapping("/perfil")
+    public ResponseEntity<?> actualizarPerfil(@RequestBody PerfilRequest request) {
+        try {
+            return ResponseEntity.ok(usuarioService.actualizarPerfil(request));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/usuarios/{id}")
+    public ResponseEntity<?> actualizarUsuario(@PathVariable Long id, @RequestBody RegistroRequest request) {
+        try {
+            return ResponseEntity.ok(usuarioService.actualizarUsuario(id, request));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/usuarios/{id}")
+    public ResponseEntity<?> eliminarUsuario(@PathVariable Long id) {
+        try {
+            usuarioService.eliminarUsuario(id);
+            return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

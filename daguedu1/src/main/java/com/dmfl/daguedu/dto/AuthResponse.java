@@ -5,6 +5,9 @@ public class AuthResponse {
     private String username;
     private String nombre;
     private String rol;
+    private String email;
+    private String direccion;
+    private String telefono;
 
 
 
@@ -17,6 +20,14 @@ public class AuthResponse {
         this.nombre = nombre;
         this.rol = rol;
     }
+
+    public AuthResponse(String token, String username, String nombre, String rol, String email, String direccion, String telefono) {
+        this(token, username, nombre, rol);
+        this.email = email;
+        this.direccion = direccion;
+        this.telefono = telefono;
+    }
+
 
     public String getToken() {
         return token;
@@ -49,6 +60,14 @@ public class AuthResponse {
     public void setRol(String rol) {
         this.rol = rol;
     }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getDireccion() { return direccion; }
+    public void setDireccion(String direccion) { this.direccion = direccion; }
+    public String getTelefono() { return telefono; }
+    public void setTelefono(String telefono) { this.telefono = telefono; }
+
     
 
     

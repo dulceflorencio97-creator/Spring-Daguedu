@@ -159,12 +159,20 @@ public class VentaService {
     }
 
     //ELIMINAR VENTA
-    @Transactional(readOnly = true)
+    @Transactional
     public void eliminarVenta (Long id){
-        if(!repository.existsById(id)){
-            throw new RuntimeException("Venta no encontrada: " + id);
+        VentaEntity venta = repository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Venta no encontrada: " + id));
+        if (!"PENDIENTE".equalsIgnoreCase(venta.getEstadoPago())) {
+            throw new RuntimeException("Solo se pueden eliminar compras pendientes");
         }
-        repository.deleteById(id);
+
+        for (DetalleVentaEntity detalle : venta.getDetalles()) {
+            ProductoEntity producto = detalle.getProducto();
+            producto.setStock(producto.getStock() + detalle.getCantidad());
+            productoRepository.save(producto);
+        }
+        repository.delete(venta);
     }
 
     //ACTUALIZAR VENTA

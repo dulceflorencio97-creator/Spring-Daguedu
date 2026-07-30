@@ -43,9 +43,13 @@ public class VentaController {
 
     //eliminar por id
     @DeleteMapping("/{id}")
-    public ResponseEntity<VentaEntity> eliminar(@PathVariable Long id){
-        servicio.eliminarVenta(id);
-        return ResponseEntity.noContent().build(); //204
+    public ResponseEntity<?> eliminar(@PathVariable Long id){
+        try {
+            servicio.eliminarVenta(id);
+            return ResponseEntity.noContent().build(); //204
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
     }
 
     //AGREGAR super revisar de favor ------------------------------------------------------------------------

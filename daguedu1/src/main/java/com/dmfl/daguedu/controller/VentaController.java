@@ -65,6 +65,24 @@ public class VentaController {
         }
     }
 
+    @PostMapping("/{id}/agregar-productos")
+    public ResponseEntity<?> agregarProductos(@PathVariable Long id, @RequestBody VentaEntity venta) {
+        try {
+            return ResponseEntity.ok(servicio.agregarProductosPendientes(id, venta.getDetalles()));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{idVenta}/detalles/{idDetalle}")
+    public ResponseEntity<?> eliminarProductoPendiente(@PathVariable Long idVenta, @PathVariable Long idDetalle) {
+        try {
+            return ResponseEntity.ok(servicio.eliminarProductoPendiente(idVenta, idDetalle));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
     @PostMapping("/checkout")
     public ResponseEntity<?> checkout(@RequestBody CheckoutForm formulario) {
         try {

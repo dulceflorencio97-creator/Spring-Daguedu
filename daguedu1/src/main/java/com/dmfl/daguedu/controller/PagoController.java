@@ -33,6 +33,9 @@ public class PagoController {
     @PostMapping("/crear-intencion")
     public ResponseEntity<?> crearIntencion(@RequestBody PagoRequest peticion) {
         try {
+            if (stringSecretKey == null || stringSecretKey.isBlank()) {
+                throw new IllegalStateException("El pago con tarjeta no esta configurado. Agrega STRIPE_API_KEY con tu clave sk_test en Coolify.");
+            }
             Stripe.apiKey = stringSecretKey;
             VentaEntity venta = ventaService.obtenerPorId(peticion.getIdVenta());
             long montoCentavos = (long) (venta.getTotal() * 100);

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.dmfl.daguedu.modelo.ProductoEntity;
 import com.dmfl.daguedu.repository.ProductoRepository;
+import com.dmfl.daguedu.repository.ProveedorRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 public class ProductoService {
 
     private final ProductoRepository repository;
+    private final ProveedorRepository proveedorRepository;
 
     @Transactional(readOnly = true)
     public List<ProductoEntity> obtenerTodos(){
@@ -27,6 +29,7 @@ public class ProductoService {
 
     @Transactional
     public ProductoEntity guardarProducto(ProductoEntity producto){
+        asignarProveedor(producto);
         return repository.save(producto);
     }
 
@@ -47,8 +50,20 @@ public class ProductoService {
         existente.setDescripcion(producto.getDescripcion());
         existente.setPrecio(producto.getPrecio());
         existente.setStock(producto.getStock());
+        existente.setImagenUrl(producto.getImagenUrl());
+        existente.setCategoria(producto.getCategoria());
+        existente.setProveedor(producto.getProveedor());
+        asignarProveedor(existente);
 
         return repository.save(existente);
+    }
+
+    private void asignarProveedor(ProductoEntity producto) {
+        if (producto.getProveedor() == null || producto.getProveedor().getId() == null) {
+            throw new RuntimeException("Selecciona un proveedor para el producto");
+        }
+        producto.setProveedor(proveedorRepository.findById(producto.getProveedor().getId())
+            .orElseThrow(() -> new RuntimeException("Proveedor no encontrado")));
     }
 
 }
